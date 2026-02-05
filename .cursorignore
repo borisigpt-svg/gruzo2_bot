@@ -1,0 +1,10 @@
+﻿.venv/
+__pycache__/
+logs/
+.env
+*.log
+*_dump*
+*.zip
+*.bak
+admin*.json
+orders.json

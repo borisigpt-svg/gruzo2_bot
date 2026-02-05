@@ -1,0 +1,25 @@
+﻿# --- Secrets ---
+.env
+.env.*
+!.env.example
+# --- Python / venv ---
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+# --- Logs / runtime ---
+logs/
+*.log
+# --- Dumps / backups ---
+*_dump*
+*.bak
+*.zip
+_RUN_STOP_DUMP*
+# --- Local runtime files (не тащим в репо) ---
+admin*.json
+orders.json
+*.missing
+# --- IDE ---
+.vscode/
+.idea/
