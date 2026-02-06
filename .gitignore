@@ -23,3 +23,11 @@ orders.json
 # --- IDE ---
 .vscode/
 .idea/
+# secrets / local runtime
+.env
+admin_chat.json
+admin.json
+orders.json
+*.log
+*_working_dump*.txt
+*_STOP_DUMP*.txt

@@ -11,3 +11,10 @@ build/
 .cache/
 .mypy_cache/
 .pytest_cache/
+.env
+admin_chat.json
+admin.json
+orders.json
+*.log
+*_working_dump*.txt
+*_STOP_DUMP*.txt
