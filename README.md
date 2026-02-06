@@ -35,3 +35,5 @@ start - Запуск меню
 debug_chatid - Показать chat_id
 claim_admin - Назначить админа (только Boris36912)
 ```
+
+Dev setup verified: Windows + Cursor + gh (noreply).
