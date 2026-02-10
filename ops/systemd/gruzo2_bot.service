@@ -1,0 +1,28 @@
+# ops/systemd/gruzo2_bot.service
+# Copy to: /etc/systemd/system/gruzo2_bot.service
+
+[Unit]
+Description=gruzo2_bot Telegram Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gruzo
+WorkingDirectory=/opt/gruzo2_bot
+EnvironmentFile=/opt/gruzo2_bot/.env
+ExecStart=/opt/gruzo2_bot/.venv/bin/python -u main.py
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Hardening (baseline)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/gruzo2_bot
+
+[Install]
+WantedBy=multi-user.target

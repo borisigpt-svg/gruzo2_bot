@@ -1,0 +1,15 @@
+PROOF_EP-002_INTEGRATE.txt
+(заполняется на шаге интеграции Execution Pack в репо)
+
+Команды + вывод:
+1) git rev-parse --show-toplevel
+2) git status
+3) проверка наличия путей:
+   - ls -la .github/workflows/ci.yml
+   - ls -la ops/healthcheck.sh
+   - ls -la docs/DOC_DoD_DEPLOY.md
+4) exec-bit:
+   - git ls-files -s ops/healthcheck.sh
+5) commit/push:
+   - git log -1
+   - ссылка на CI run (Actions) или ID workflow

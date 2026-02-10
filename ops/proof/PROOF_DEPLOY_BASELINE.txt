@@ -1,0 +1,18 @@
+PROOF_DEPLOY_BASELINE.txt
+(заполняется на шаге деплоя на сервере)
+
+Команды + выводы (вставить текстом):
+1) systemctl status / enable:
+   - systemctl status gruzo2_bot --no-pager
+   - systemctl enable gruzo2_bot
+   - systemctl is-active gruzo2_bot
+2) journalctl tail:
+   - journalctl -u gruzo2_bot -n 200 --no-pager
+3) healthcheck:
+   - bash ops/healthcheck.sh
+   - echo $?
+4) reboot proof:
+   - время reboot
+   - после reboot: systemctl is-active gruzo2_bot
+PASS/FAIL:
+- чекбоксы DoD закрыты? (да/нет)

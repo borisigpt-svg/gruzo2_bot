@@ -1,0 +1,18 @@
+PROOF_PACKAGING_EP-003.txt
+DATE: 2026-02-10
+
+ACTION:
+- Сборка обновлённого Execution Pack v1.1 (gruzo2_bot_production_guardrails_pack_v1.1)
+
+TEST:
+- Сформирован PACK_MANIFEST_SHA256.txt и содержит все файлы.
+- Структура: docs/ ops/ .github/ CHAIN_LOG.md присутствует.
+- CI workflow содержит permissions/concurrency/cache/timeout.
+
+EXPECTED:
+- Пакет готов к интеграции в репо и даёт автоматические гейты.
+
+PROOF:
+- PACK_MANIFEST_SHA256.txt
+- CHANGELOG_EXECUTION_PACK.md
+- CHAIN_LOG.md (EP-003 entry)
