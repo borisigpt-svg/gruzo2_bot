@@ -1,15 +1,13 @@
-PROOF_EP-002_INTEGRATE.txt
-(заполняется на шаге интеграции Execution Pack в репо)
-
-Команды + вывод:
-1) git rev-parse --show-toplevel
-2) git status
-3) проверка наличия путей:
-   - ls -la .github/workflows/ci.yml
-   - ls -la ops/healthcheck.sh
-   - ls -la docs/DOC_DoD_DEPLOY.md
-4) exec-bit:
-   - git ls-files -s ops/healthcheck.sh
-5) commit/push:
-   - git log -1
-   - ссылка на CI run (Actions) или ID workflow
+﻿PROOF EP-002 - INTEGRATE (HQ++)
+DATE: 2026-02-10 22:36:00
+COMMIT: 8e2d687fce064f8b0c0df3b80833b127e7d23bd4
+CHECKS:
+- .github/workflows/ci.yml: True
+- docs/DOC_DoD_DEPLOY.md: True
+- ops/healthcheck.sh: True
+- git ls-files -s ops/healthcheck.sh:
+  100755 ca0833f83dee85dda0fead41ee4108a52e633982 0	ops/healthcheck.sh
+NOTES:
+- exec-bit fixed to 100755
+- .gitattributes added (LF policy: sh/service/yml)
+- CI: (paste Actions URL here after check)
