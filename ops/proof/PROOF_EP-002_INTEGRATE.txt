@@ -1,13 +1,14 @@
 ﻿PROOF EP-002 - INTEGRATE (HQ++)
-DATE: 2026-02-10 22:36:00
-COMMIT: 8e2d687fce064f8b0c0df3b80833b127e7d23bd4
-CHECKS:
-- .github/workflows/ci.yml: True
-- docs/DOC_DoD_DEPLOY.md: True
-- ops/healthcheck.sh: True
-- git ls-files -s ops/healthcheck.sh:
-  100755 ca0833f83dee85dda0fead41ee4108a52e633982 0	ops/healthcheck.sh
+DATE: 2026-02-10 23:08:42
+COMMIT: a39865da2b383bd21e4f49dae2dbe3646b37cf38
+CI:
+- status: 
+- conclusion: 
+- url: 
+- headSha: 
+- createdAt: 
+ops/healthcheck.sh mode:
+100755 ca0833f83dee85dda0fead41ee4108a52e633982 0	ops/healthcheck.sh
 NOTES:
-- exec-bit fixed to 100755
-- .gitattributes added (LF policy: sh/service/yml)
-- CI: (paste Actions URL here after check)
+- exec-bit закреплён (100755)
+- .gitattributes (LF policy) активен
