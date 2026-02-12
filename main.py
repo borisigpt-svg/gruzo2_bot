@@ -2,6 +2,8 @@
 import os
 import json
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
 import sys
 import atexit
 import datetime
@@ -31,7 +33,6 @@ def _setup_app_logging():
 
 _setup_app_logging()
 
-from dotenv import load_dotenv
 
 # --- HQ+++ constants ---
 _MUTEX_NAME = r"Local\GRUZO2_BOT_LOCK"
@@ -250,7 +251,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
-from data import ROUTES, WEIGHT_BANDS, TARIFFS, SCHEDULE, GEO, CONTACTS
+from data import ROUTES, TARIFFS, SCHEDULE, GEO, CONTACTS
 
 try:
     from admin_store import load_admin_chat_id, save_admin_chat_id
@@ -288,8 +289,6 @@ logging.info("BOOT: ADMIN_CHAT_ID=%s", ADMIN_CHAT_ID)
 ORDERS = load_orders()
 logging.info("BOOT: ORDERS loaded=%s", len(ORDERS))
 
-load_dotenv(override=True)
-
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "Boris36912")
 
@@ -302,12 +301,14 @@ def is_owner(user_id: int) -> bool:
     return user_id == BORIS_ID
 # --- END PATCH ---
 
-    STATUS_LABELS = {
+
+STATUS_LABELS = {
     "ok": "✅ Принято",
     "way": "🚚 В пути",
     "done": "📦 Доставлено",
     "cancel": "❌ Отменено",
-    }
+}
+
 
 
 def kb_admin_status(order_id: str):
@@ -339,9 +340,6 @@ class NewOrder(StatesGroup):
     desc = State()
 
 router = Router()
-import contextlib
-from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import CallbackQuery
 
 async def safe_cb_answer(c: CallbackQuery, text: str = "", *, show_alert: bool = False) -> None:
     # Если кнопка нажата на старой карточке (после рестарта) — Telegram ругается "query is too old".
