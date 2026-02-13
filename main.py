@@ -1,18 +1,31 @@
 # ===== GRUZO2 HQ+++ main.py (single process / mutex / logs / soft-stop / tcp-stop) =====
-import os
-import json
-from pathlib import Path
-from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
-import sys
 import atexit
-import datetime
 import asyncio
 import contextlib
+import datetime
+import importlib
+import json
 import logging
-
+import os
+import random
+import sys
 from logging.handlers import TimedRotatingFileHandler
+from pathlib import Path
+
+from aiogram import Bot, Dispatcher, F, Router
+from aiogram.exceptions import TelegramBadRequest, TelegramConflictError, TelegramNetworkError
+from aiogram.filters import Command, CommandStart
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import CallbackQuery, Message
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from dotenv import load_dotenv
+
+# Load .env before reading config from os.getenv
+load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
+
 _BOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 def _setup_app_logging():
     log_dir = os.path.join(_BOT_DIR, "logs")
@@ -225,8 +238,6 @@ async def _sleep_or_stop(stop_event: asyncio.Event, seconds: int) -> bool:
     except asyncio.TimeoutError:
         return stop_event.is_set()
 
-import random
-
 async def _backoff_or_stop(stop_event: asyncio.Event, attempt: int, base: float = 1.0, cap: float = 60.0) -> bool:
     """
     attempt: 0,1,2...
@@ -243,25 +254,27 @@ _acquire_mutex_or_exit()
 _install_exit_hooks()
 _launcher_log("START")
 
-from aiogram.exceptions import TelegramNetworkError, TelegramConflictError, TelegramBadRequest
-from aiogram import Bot, Dispatcher, Router, F
-from aiogram.types import Message, CallbackQuery
-from aiogram.filters import CommandStart, Command
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.fsm.state import State, StatesGroup
-from aiogram.fsm.context import FSMContext
-
-from data import ROUTES, TARIFFS, SCHEDULE, GEO, CONTACTS
+# Project modules (loaded after env + after mutex init)
+_data = importlib.import_module("data")
+ROUTES = _data.ROUTES
+TARIFFS = _data.TARIFFS
+SCHEDULE = _data.SCHEDULE
+GEO = _data.GEO
+CONTACTS = _data.CONTACTS
 
 try:
-    from admin_store import load_admin_chat_id, save_admin_chat_id
+    _admin_store = importlib.import_module("admin_store")
+    load_admin_chat_id = _admin_store.load_admin_chat_id
+    save_admin_chat_id = _admin_store.save_admin_chat_id
 except Exception:
     def load_admin_chat_id() -> int:
         return 0
+
     def save_admin_chat_id(chat_id: int) -> None:
         pass
 
-import texts
+texts = importlib.import_module("texts")
+
 
 ORDERS_FILE = Path(__file__).with_name("orders.json")
 
