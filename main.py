@@ -1,4 +1,6 @@
 # ===== GRUZO2 HQ+++ main.py (single process / mutex / logs / soft-stop / tcp-stop) =====
+# ===== GRUZO2 HQ++ main.py (single process / mutex / logs / soft-stop / tcp-stop) =====
+
 import atexit
 import asyncio
 import contextlib
@@ -13,7 +15,11 @@ from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher, F, Router
-from aiogram.exceptions import TelegramBadRequest, TelegramConflictError, TelegramNetworkError
+from aiogram.exceptions import (
+    TelegramBadRequest,
+    TelegramConflictError,
+    TelegramNetworkError,
+)
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -255,6 +261,7 @@ _install_exit_hooks()
 _launcher_log("START")
 
 # Project modules (loaded after env + after mutex init)
+# Project modules (loaded after env + after mutex init)
 _data = importlib.import_module("data")
 ROUTES = _data.ROUTES
 TARIFFS = _data.TARIFFS
@@ -267,14 +274,15 @@ try:
     load_admin_chat_id = _admin_store.load_admin_chat_id
     save_admin_chat_id = _admin_store.save_admin_chat_id
 except Exception:
+
     def load_admin_chat_id() -> int:
         return 0
 
     def save_admin_chat_id(chat_id: int) -> None:
         pass
 
-texts = importlib.import_module("texts")
 
+texts = importlib.import_module("texts")
 
 ORDERS_FILE = Path(__file__).with_name("orders.json")
 
