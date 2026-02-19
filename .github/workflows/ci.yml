@@ -39,13 +39,13 @@ jobs:
         run: |
           python -m compileall .
   secret_scan:
-   runs-on: ubuntu-latest
-   timeout-minutes: 10
-   steps:
-     - uses: actions/checkout@v4
-     - name: Gitleaks
-       uses: gitleaks/gitleaks-action@v2
-       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --no-git --source . --redact --report-format sarif --report-path results.sarif
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
