@@ -7,6 +7,7 @@ name: CI
 
 permissions:
   contents: read
+  security-events: write
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -43,6 +44,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+         fetch-depth: 0
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@v2
         with:
