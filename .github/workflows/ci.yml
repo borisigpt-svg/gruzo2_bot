@@ -49,6 +49,6 @@ jobs:
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@v2
         with:
-          args: detect --no-git --source . --redact --report-format sarif --report-path results.sarif
+          args: detect --source . --redact --report-format sarif --report-path results.sarif
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
