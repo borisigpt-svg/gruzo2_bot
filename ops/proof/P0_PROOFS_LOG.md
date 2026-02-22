@@ -27,7 +27,6 @@
 Факты: branch protection enforced, PR required, checks quality+secret_scan
 Следующее:старт P0-004 
 ## P0-004
-
 ### Действия
 - Добавлена политика PII: ops/share_safe/PII_POLICY.md
 - В CI добавлен job: pii_scan (pull_request)
