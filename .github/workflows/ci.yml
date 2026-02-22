@@ -50,3 +50,82 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  pii_scan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: PII scan (lightweight)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python - <<'PY'
+          import os, re, sys, subprocess, pathlib
+
+          base = os.environ["BASE_SHA"]
+          head = os.environ["HEAD_SHA"]
+
+          files = subprocess.check_output(
+              ["git","diff","--name-only","--diff-filter=ACMR", f"{base}...{head}"],
+              text=True
+          ).splitlines()
+
+          # если вдруг PR пустой по файлам — просто ок
+          if not files:
+              print("PII scan: OK (no changed files).")
+              sys.exit(0)
+
+          skip_ext = {
+              ".png",".jpg",".jpeg",".gif",".bmp",".pdf",".zip",".gz",".tar",".7z",
+              ".ico",".mp3",".mp4",".wav",".mov",".avi",".exe",".dll",".so",".dylib",".bin"
+          }
+
+          # базовые паттерны (умышленно простые, чтобы стартануть)
+          email_re = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I)
+          ssn_re   = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
+          phone_re = re.compile(r"(?<!\w)(?:\+?\d[\d\s().-]{8,}\d)(?!\w)")
+
+          # allowlist: примеры и редактированные значения
+          allow = ["example.com", "REDACTED", "redacted", "0000000000", "+10000000000"]
+
+          hits = []
+          for f in files:
+              p = pathlib.Path(f)
+              if not p.exists() or p.suffix.lower() in skip_ext:
+                  continue
+
+              try:
+                  txt = p.read_text(errors="ignore")
+              except Exception:
+                  continue
+
+              scrub = txt
+              for a in allow:
+                  scrub = scrub.replace(a, "")
+
+              for m in email_re.finditer(scrub):
+                  hits.append((f, "email", m.group(0)))
+
+              for m in ssn_re.finditer(scrub):
+                  hits.append((f, "ssn", m.group(0)))
+
+              for m in phone_re.finditer(scrub):
+                  val = m.group(0).strip()
+                  digits = re.sub(r"\D", "", val)
+                  if 10 <= len(digits) <= 15:
+                      hits.append((f, "phone", val))
+
+          if hits:
+              print("PII-like patterns detected in changed files:")
+              for f,t,v in hits[:50]:
+                  print(f"- {f}: {t}: {v}")
+              print(f"Total hits: {len(hits)}")
+              sys.exit(1)
+
+          print("PII scan: OK (no hits).")
+          PY
