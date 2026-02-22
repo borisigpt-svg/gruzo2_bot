@@ -26,7 +26,6 @@
 Статус: PASS
 Факты: branch protection enforced, PR required, checks quality+secret_scan
 Следующее:старт P0-004 
-- 
 ## P0-004
 
 ### Действия
