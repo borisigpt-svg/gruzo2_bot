@@ -65,67 +65,77 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           python - <<'PY'
-          import os, re, sys, subprocess, pathlib
+          import os, re, sys, subprocess
+          from collections import defaultdict
 
           base = os.environ["BASE_SHA"]
           head = os.environ["HEAD_SHA"]
 
-          files = subprocess.check_output(
-              ["git","diff","--name-only","--diff-filter=ACMR", f"{base}...{head}"],
-              text=True
-          ).splitlines()
-
-          # если вдруг PR пустой по файлам — просто ок
-          if not files:
-              print("PII scan: OK (no changed files).")
-              sys.exit(0)
+          diff = subprocess.check_output(
+            ["git", "diff", "--unified=0", "--diff-filter=ACMR", f"{base}...{head}"],
+            text=True, encoding="utf-8", errors="replace"
+          )
 
           skip_ext = {
-              ".png",".jpg",".jpeg",".gif",".bmp",".pdf",".zip",".gz",".tar",".7z",
-              ".ico",".mp3",".mp4",".wav",".mov",".avi",".exe",".dll",".so",".dylib",".bin"
+            ".png",".jpg",".jpeg",".gif",".bmp",".pdf",".zip",".gz",".tar",".7z",
+            ".ico",".mp3",".mp4",".wav",".mov",".avi",".exe",".dll",".so",".dylib",".bin"
           }
 
-          # базовые паттерны (умышленно простые, чтобы стартануть)
+          # allowlist: примеры и редактированные значения
+          allow = {"example.com", "REDACTED", "redacted", "0000000000", "+10000000000"}
+
           email_re = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I)
           ssn_re   = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
           phone_re = re.compile(r"(?<!\w)(?:\+?\d[\d\s().-]{8,}\d)(?!\w)")
 
-          # allowlist: примеры и редактированные значения
-          allow = ["example.com", "REDACTED", "redacted", "0000000000", "+10000000000"]
+          def scrub(s: str) -> str:
+            for a in allow:
+              s = s.replace(a, "")
+            return s
 
-          hits = []
-          for f in files:
-              p = pathlib.Path(f)
-              if not p.exists() or p.suffix.lower() in skip_ext:
+          # Собираем только добавленные строки по каждому файлу
+          added = []  # (file, line)
+          current = None
+          for line in diff.splitlines():
+             if line.startswith("+++ b/"):
+                  p = line[6:].strip()
+                  current = None if p == "/dev/null" else p
+                  continue
+             if not current:
+                 continue
+             if line.startswith("+") and not line.startswith("+++"):
+                  added.append((current, line[1:]))
+
+             if not added:
+                print("PII scan: OK (no added lines in diff).")
+                sys.exit(0)
+
+             hits = defaultdict(int)
+
+             for f, line in added:
+               ext = os.path.splitext(f)[1].lower()
+               if ext in skip_ext:
                   continue
 
-              try:
-                  txt = p.read_text(errors="ignore")
-              except Exception:
-                  continue
+               s = scrub(line)
 
-              scrub = txt
-              for a in allow:
-                  scrub = scrub.replace(a, "")
+               hits[(f, "email")] += sum(1 for _ in email_re.finditer(s))
+               hits[(f, "ssn")]   += sum(1 for _ in ssn_re.finditer(s))
 
-              for m in email_re.finditer(scrub):
-                  hits.append((f, "email", m.group(0)))
+               for m in phone_re.finditer(s):
+                 val = m.group(0).strip()
+                 digits = re.sub(r"\D", "", val)
+                 if 10 <= len(digits) <= 15:
+                    hits[(f, "phone")] += 1
 
-              for m in ssn_re.finditer(scrub):
-                  hits.append((f, "ssn", m.group(0)))
-
-              for m in phone_re.finditer(scrub):
-                  val = m.group(0).strip()
-                  digits = re.sub(r"\D", "", val)
-                  if 10 <= len(digits) <= 15:
-                      hits.append((f, "phone", val))
+          # Оставляем только реально найденные
+          hits = {k:v for k,v in hits.items() if v > 0}
 
           if hits:
-              print("PII-like patterns detected in changed files:")
-              for f,t,v in hits[:50]:
-                  print(f"- {f}: {t}: {v}")
-              print(f"Total hits: {len(hits)}")
-              sys.exit(1)
+             print("PII-like patterns detected in ADDED lines (values redacted):")
+             for (f, t), c in sorted(hits.items()):
+                print(f"- {f}: {t}: {c} hit(s)")
+             sys.exit(1)
 
-          print("PII scan: OK (no hits).")
+          print("PII scan: OK (no hits in added lines).")
           PY
