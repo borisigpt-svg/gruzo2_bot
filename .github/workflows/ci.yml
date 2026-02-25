@@ -98,24 +98,24 @@ jobs:
           current = None
           for line in diff.splitlines():
              if line.startswith("+++ b/"):
-                  p = line[6:].strip()
-                  current = None if p == "/dev/null" else p
-                  continue
+               p = line[6:].strip()
+               current = None if p == "/dev/null" else p
+               continue
              if not current:
                  continue
              if line.startswith("+") and not line.startswith("+++"):
-                  added.append((current, line[1:]))
+               added.append((current, line[1:]))
 
              if not added:
-                print("PII scan: OK (no added lines in diff).")
-                sys.exit(0)
+               print("PII scan: OK (no added lines in diff).")
+               sys.exit(0)
 
              hits = defaultdict(int)
 
              for f, line in added:
                ext = os.path.splitext(f)[1].lower()
                if ext in skip_ext:
-                  continue
+                 continue
 
                s = scrub(line)
 
@@ -126,7 +126,7 @@ jobs:
                  val = m.group(0).strip()
                  digits = re.sub(r"\D", "", val)
                  if 10 <= len(digits) <= 15:
-                    hits[(f, "phone")] += 1
+                   hits[(f, "phone")] += 1
 
           # Оставляем только реально найденные
           hits = {k:v for k,v in hits.items() if v > 0}
